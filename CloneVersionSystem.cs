@@ -37,6 +37,7 @@ public class Clonne : ICloneable
     private RsStack<ActionForUndo> _actionsHistory;
     private RsStack<ActionForUndo> _undoHistory;
     private Clonne _clonnedFrom;
+    private List<Clonne> _clonnes = new();
     public Clonne()
     {
         Programms = new();
@@ -68,6 +69,7 @@ public class Clonne : ICloneable
 
     public void AddItem(string item)
     {
+        ClonesReady();
         GetReady();
         var ch = Programms.Add(item);
         if (ch)
@@ -79,6 +81,7 @@ public class Clonne : ICloneable
 
     public void RemoveItem()
     {
+        ClonesReady();
         GetReady();
         _actionsHistory.Push(new ActionForUndo() { ActionType = ActionType.Remove, ChangedItem = Programms.Last() });
         Programms.Remove(Programms.Last());
@@ -87,6 +90,7 @@ public class Clonne : ICloneable
 
     public void Undo()
     {
+        ClonesReady();
         GetReady();
 
 
@@ -105,6 +109,7 @@ public class Clonne : ICloneable
 
     public void Redo()
     {
+        ClonesReady();
         GetReady();
 
         var last = _undoHistory.Pop();
@@ -121,6 +126,11 @@ public class Clonne : ICloneable
 
     }
 
+    public void ClonesReady()
+    {
+        _clonnes.ForEach(x => x.GetReady());
+    }
+
     public void GetReady()
     {
         if (_actionsHistory is null || _undoHistory is null || Programms is null )
@@ -135,7 +145,9 @@ public class Clonne : ICloneable
 
     public object Clone()
     {
-        return new Clonne(this);
+        var clone = new Clonne(this);
+        _clonnes.Add(clone);
+        return clone;
     }
 }
 
